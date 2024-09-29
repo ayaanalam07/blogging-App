@@ -110,7 +110,7 @@ import {
         resolve(dataArr);
       });
       reject("error occured");
-    });
+  });
   };
   
   //get all data
@@ -157,6 +157,8 @@ import {
       console.log(error);
     }
   }
+
+ 
   
   
   export { auth, db, signUpUser, loginUser, signOutUser, sendData, getData, getAllData, deleteDocument, updateDocument, uploadImage };
