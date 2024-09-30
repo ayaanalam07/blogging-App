@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { signOutUser } from '../config/firebaseMethod';
+import { auth, db, signOutUser } from '../config/firebaseMethod';
+import { onAuthStateChanged } from 'firebase/auth/cordova';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -9,6 +11,37 @@ const Navbar = () => {
     await signOutUser();
     navigate('/Login');
   };
+
+  const [profileImage, setProfileImage] = useState('https://tse2.mm.bing.net/th?id=OIP.iilJNbdj0e2XNmLaNCopewHaEt&pid=Api&P=0&h=220')
+  const [user, setUser] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+        setUser(currentUser);
+
+        if (currentUser) {
+            const uid = currentUser.uid;
+
+            try {
+                const q = query(collection(db, "users"), where("id", "==", uid));
+                const querySnapshot = await getDocs(q);
+
+                if (!querySnapshot.empty) {
+                    querySnapshot.forEach((doc) => {
+                        const data = doc.data();
+                        if (data.profileImage) {
+                            setProfileImage(data.profileImage);
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error("Error fetching profile image:", error);
+            }
+        }
+    });
+
+    return () => unsubscribe();
+}, [auth]);
 
   return (
     <div className="navbar bg-info">
@@ -19,10 +52,10 @@ const Navbar = () => {
         <div className="dropdown dropdown-end">
           <div tabIndex={0} role="button" className="btn btn-ghost btn-circle avatar">
             <div className="w-10 rounded-full">
-              
+
               <img
                 alt="Profile"
-                src='https://tse2.mm.bing.net/th?id=OIP.iilJNbdj0e2XNmLaNCopewHaEt&pid=Api&P=0&h=220'
+                src={profileImage}
               />
             </div>
           </div>
