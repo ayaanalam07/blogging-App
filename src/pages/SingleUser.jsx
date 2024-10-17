@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { auth, db, getData } from '../config/firebaseMethod'; // Importing Firebase methods
+import { auth, db } from '../config/firebaseMethod'; // Importing Firebase methods
 import { onAuthStateChanged } from 'firebase/auth';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 
 const SingleUser = () => {
-  const [userData, setUserData] = useState(null);
 
-  const [profileImage, setProfileImage] = useState('https://tse2.mm.bing.net/th?id=OIP.iilJNbdj0e2XNmLaNCopewHaEt&pid=Api&P=0&h=220')
+  const [profileImage, setProfileImage] = useState('no-image')
   const [user, setUser] = useState(false);
 
   useEffect(() => {
@@ -36,18 +35,19 @@ const SingleUser = () => {
 
     return () => unsubscribe();
 }, [auth]);
-
   return (
     <div className="profile-container flex justify-center items-center mt-40">
-      {userData ? (
+      {user ? (
         <div className="user-profile bg-white p-6 rounded-lg shadow-lg">
           <img 
             src={profileImage}
             alt="Profile" 
             className="w-32 h-32 object-cover rounded-full mx-auto mb-4" 
           />
-          <h2 className="text-center text-2xl font-semibold">{userData.fullName}</h2>
-          <p className="text-center text-gray-600">{userData.email}</p>
+          <h2 className="text-center text-2xl font-semibold">{user.fullName}</h2>
+          <p className="text-center text-gray-600">{user.email}</p>
+          <p className="text-center text-gray-600">{user.id}</p>
+
         </div>
       ) : (
         <p>Loading profile...</p>

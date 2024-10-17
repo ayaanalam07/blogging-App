@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { signUpUser, uploadImage } from '../config/firebaseMethod';
 import { useNavigate } from 'react-router-dom';
 
@@ -7,15 +7,19 @@ const Register = () => {
   const email = useRef();
   const password = useRef();
   const profileImage = useRef();
+  const [loading, setLoading] = useState(false);  // Manage loading state
 
   const navigate = useNavigate();
 
   const signUserFromFirebase = async (event) => {
     event.preventDefault();
-
-    const userProfileImageUrl = await uploadImage(profileImage.current.files[0], email.current.value);
+    setLoading(true);  // Start loading when button is clicked
 
     try {
+      // Upload the profile image
+      const userProfileImageUrl = await uploadImage(profileImage.current.files[0], email.current.value);
+
+      // Register the user
       const userData = await signUpUser({
         fullName: fullName.current.value,
         email: email.current.value,
@@ -23,12 +27,14 @@ const Register = () => {
         profileImage: userProfileImageUrl,
       });
 
-      // Navigate to the profile page after successful registration
-      navigate(`Login`);
-      
       console.log(userData);
+
+      // Navigate to the login page after successful registration
+      navigate('/login');
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false);  // Stop loading when the process is complete
     }
   };
 
@@ -47,7 +53,9 @@ const Register = () => {
           </label><br />
           <label>
             <input type="file" className="file-input file-input-bordered flex items-center gap-2 w-full" ref={profileImage} />
-            <button type="submit" className="btn btn-info mt-3 w-full">Register</button>
+            <button type="submit" className="btn btn-info mt-3 w-full" disabled={loading}>
+              {loading ? 'Registering...' : 'Register'}  {/* Show loading text */}
+            </button>
           </label>
         </div>
       </form>
